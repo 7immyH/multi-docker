@@ -1,0 +1,38 @@
+version: '3.7'
+services:
+    nginx:
+        restart: always
+        build:
+            dockerfile: Dockerfile.dev
+            context: ./nginx
+        ports:
+            - '3050:80'
+    redis:
+        image: 'redis:alpine'
+    postgres:
+        image: 'postgres:alpine'
+    api:
+        depends_on: 
+            - postgres
+        build:
+            dockerfile: Dockerfile.dev
+            context: ./server
+        environment: 
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - PGUSER=postgres
+            - PGHOST=postgres
+            - PGDATABASE=postgres
+            - PGPASSWORD=mysecretpassword
+            - PGPORT=5432
+    client:
+        build:
+            dockerfile: Dockerfile.dev
+            context: ./client
+    worker:
+        build:
+            dockerfile: Dockerfile.dev
+            context: ./worker
+        environment: 
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
